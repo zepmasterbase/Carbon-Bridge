@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarbonBridge Projects</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r152/three.min.js"></script>
+<style>
+/* ---------- General ---------- */
+body{margin:0;font-family:'Montserrat',sans-serif;background:#0B0C10;color:#E0E0E0;}
+header{position:fixed;width:100%;top:0;left:0;background:rgba(15,15,15,0.95);display:flex;justify-content:space-between;align-items:center;padding:1rem 3rem;box-shadow:0 2px 10px rgba(0,255,128,0.2);z-index:1000;}
+header .logo{color:#00FF96;font-weight:700;font-size:1.5rem;}
+header nav a{color:#00FF96;margin-left:2rem;font-weight:500;}
+header nav a:hover{color:#2CF5A0;}
+section{padding:6rem 3rem 3rem 3rem;max-width:1200px;margin:0 auto;}
+h2{text-align:center;color:#00FF96;font-size:2.2rem;margin-bottom:2rem;}
+.wallet-info{text-align:center;margin-bottom:2rem;}
+.wallet-info p{font-weight:600;color:#00FF96;margin-top:.5rem;}
+.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;}
+
+/* ---------- Project Card ---------- */
+.card{position:relative;background:#1F1F2C;border-radius:12px;padding:2rem;box-shadow:0 6px 20px rgba(0,255,128,.1);transition:.3s;overflow:hidden;}
+.card:hover{transform:translateY(-8px);box-shadow:0 12px 25px rgba(0,255,128,.3);}
+.card h3{color:#00FF96;margin-bottom:0.5rem;}
+.card p{font-size:1rem;margin-bottom:0.5rem;}
+.card button{padding:.6rem 1.2rem;background:#00FF96;color:#0B0C10;font-weight:700;border-radius:6px;margin-top:.5rem;cursor:pointer;transition:.3s;}
+.card button:hover{background:#2CF5A0;transform:translateY(-2px);}
+
+/* ---------- CO2 meter ---------- */
+.meter-container{width:100%;height:10px;background:#333;border-radius:5px;margin-top:0.5rem;overflow:hidden;}
+.meter-fill{height:100%;width:0%;background:#2CF5A0;transition:width 0.5s ease;}
+
+/* ---------- Footer ---------- */
+footer{background:#0B0C10;color:#00FF96;text-align:center;padding:2rem;margin-top:4rem;}
+footer a{color:#2CF5A0;margin:0 .5rem;}
+canvas{position:absolute;top:0;left:0;width:100%;height:100%;pointer-events:none;}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo">CarbonBridge</div>
+  <nav><a href="index.html">Home</a> | <a href="dashboard.html">Dashboard</a></nav>
+</header>
+
+<section>
+  <h2>Explore Carbon Projects</h2>
+  <div class="wallet-info">
+    <button onclick="connectWallet()">Connect Wallet</button>
+    <p id="walletAddress">Not connected</p>
+  </div>
+
+  <div class="dashboard" id="dashboard">
+    <!-- Project cards dynamically injected here -->
+  </div>
+</section>
+
+<footer>
+  <p>&copy; 2026 CarbonBridge. All rights reserved.</p>
+  <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a></p>
+</footer>
+
+<script>
+// Sample projects
+const projects = [
+  {id:0,name:'Kenya Reforestation',co2:500,type:'Trees',location:'Kenya'},
+  {id:1,name:'India Solar Farm',co2:1200,type:'Solar',location:'India'},
+  {id:2,name:'US Wind Energy',co2:800,type:'Wind',location:'USA'},
+  {id:3,name:'Brazil Forest Conservation',co2:700,type:'Trees',location:'Brazil'}
+];
+
+let provider, signer, contract;
+const contractAddress="0xYourContractAddress"; // replace with actual contract
+const abi=[
+  "function purchaseCarbonToken(uint256 projectId) public payable",
+  "function balanceOf(address owner,uint256 projectId) public view returns(uint256)",
+  "function retireToken(uint256 projectId,uint256 amount) public",
+  "function retirementHistory(address owner,uint256 projectId) public view returns(uint256)"
+];
+
+// Connect wallet
+async function connectWallet(){
+  if(window.ethereum){
+    provider = new ethers.BrowserProvider(window.ethereum);
+    await provider.send("eth_requestAccounts", []);
+    signer = await provider.getSigner();
+    const address = await signer.getAddress();
+    document.getElementById('walletAddress').innerText = "Connected: "+address;
+    contract = new ethers.Contract(contractAddress, abi, signer);
+    loadDashboard();
+  }else alert("Please install MetaMask!");
+}
+
+// Load project cards dynamically
+async function loadDashboard(){
+  if(!signer) return;
+  const dashboardDiv = document.getElementById('dashboard');
+  dashboardDiv.innerHTML = "";
+  for(let p of projects){
+    let balance=0, retired=0;
+    try{
+      balance = await contract.balanceOf(await signer.getAddress(), p.id);
+      retired = await contract.retirementHistory(await signer.getAddress(), p.id);
+    }catch(e){console.error(e);}
+    const card = document.createElement('div');
+    card.className='card';
+    card.innerHTML=`
+      <h3>${p.name}</h3>
+      <p>Type: ${p.type} | Location: ${p.location}</p>
+      <p>CO₂ Offset per Token: ${p.co2} tons</p>
+      <p>Tokens Owned: ${balance}</p>
+      <p>Tokens Retired: ${retired}</p>
+      <div class="meter-container"><div class="meter-fill" style="width:${retired>0?Math.min(100,retired*10):0}%"></div></div>
+      <button onclick="purchaseTokens(${p.id})">Buy Token</button>
+      <button onclick="retireTokens(${p.id})">Retire Tokens</button>
+      <canvas id="tokenCanvas${p.id}"></canvas>
+    `;
+    dashboardDiv.appendChild(card);
+    init3DTokenAnimation(`tokenCanvas${p.id}`);
+  }
+}
+
+// Purchase tokens
+async function purchaseTokens(projectId){
+  if(!signer){alert("Connect wallet first!"); return;}
+  try{
+    const tx = await contract.purchaseCarbonToken(projectId,{value:ethers.parseEther("0.01")}); // example price
+    await tx.wait();
+    alert("Token purchased!");
+    loadDashboard();
+  }catch(e){console.error(e); alert("Purchase failed.");}
+}
+
+// Retire tokens
+async function retireTokens(projectId){
+  if(!signer){alert("Connect wallet first!"); return;}
+  try{
+    const balance = await contract.balanceOf(await signer.getAddress(), projectId);
+    if(balance==0){alert("No tokens to retire"); return;}
+    const tx = await contract.retireToken(projectId,balance);
+    await tx.wait();
+    alert("Tokens retired!");
+    loadDashboard();
+  }catch(e){console.error(e); alert("Retirement failed.");}
+}
+
+// ---------- 3D Token Animation ----------
+function init3DTokenAnimation(canvasId){
+  const canvas = document.getElementById(canvasId);
+  const scene = new THREE.Scene();
+  const camera = new THREE.PerspectiveCamera(45,1,0.1,1000);
+  const renderer = new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setSize(100,100);
+  const geometry = new THREE.TorusGeometry(0.5,0.2,16,100);
+  const material = new THREE.MeshStandardMaterial({color:0x00FF96,metalness:0.7,roughness:0.3});
+  const torus = new THREE.Mesh(geometry,material);
+  scene.add(torus);
+  const light = new THREE.PointLight(0x00FF96,1);
+  light.position.set(2,2,5);
+  scene.add(light);
+  camera.position.z=3;
+  function animate(){
+    requestAnimationFrame(animate);
+    torus.rotation.x+=0.01;
+    torus.rotation.y+=0.01;
+    renderer.render(scene,camera);
+  }
+  animate();
+}
+</script>
+
+</body>
+</html>
