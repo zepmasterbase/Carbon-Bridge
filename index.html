@@ -34,7 +34,7 @@ section p{max-width:800px;margin:0 auto 2rem auto;text-align:center;}
 .project-card:hover{transform:translateY(-8px);box-shadow:0 12px 25px rgba(0,255,128,.3);}
 .project-card h3{color:#00FF96;margin-bottom:.5rem;}
 .project-card p{font-size:.95rem;margin-bottom:1rem;}
-.project-card button{padding:.6rem;background:#00FF96;color:#0B0C10;font-weight:700;}
+.project-card button{padding:.6rem;background:#00FF96;color:#0B0C10;font-weight:700;margin-bottom:.5rem;}
 .project-card button:hover{background:#2CF5A0;transform:translateY(-2px);}
 .impact{display:flex;justify-content:center;gap:4rem;margin-top:3rem;flex-wrap:wrap;}
 .counter{background:#0F1118;color:#00FF96;padding:2rem 3rem;border-radius:12px;text-align:center;transition:.3s;}
@@ -125,7 +125,10 @@ footer a{color:#2CF5A0;margin:0 .5rem;font-weight:500;}
 <script>
 let provider, signer, contract;
 const contractAddress="0xYourContractAddress"; // replace with your Ethereum contract
-const abi=["function purchaseCarbonToken(uint256 projectId) public payable","function balanceOf(address owner,uint256 projectId) public view returns(uint256)","function retireToken(uint256 projectId,uint256 amount) public"];
+const abi=["function purchaseCarbonToken(uint256 projectId) public payable",
+           "function balanceOf(address owner,uint256 projectId) public view returns(uint256)",
+           "function retireToken(uint256 projectId,uint256 amount) public"];
+
 const marketplace=document.getElementById('marketplace');
 const sampleProjects=[
   {name:'Kenya Reforestation',type:'Trees',co2:500,location:'Kenya',id:0},
@@ -134,17 +137,48 @@ const sampleProjects=[
   {name:'Brazil Forest Conservation',type:'Trees',co2:700,location:'Brazil',id:3}
 ];
 
+// ---------- Wallet Connect with Redirect ----------
 async function connectWallet(){
   if(window.ethereum){
     provider=new ethers.BrowserProvider(window.ethereum);
     await provider.send("eth_requestAccounts", []);
     signer=await provider.getSigner();
     const address=await signer.getAddress();
+    
     document.getElementById('walletAddress').innerText="Connected: "+address;
+    
     contract=new ethers.Contract(contractAddress,abi,signer);
-    updateBalances();
-  }else{alert("Please install MetaMask!");}
+    
+    // Save address to localStorage for dashboard
+    localStorage.setItem('connectedWallet', address);
+
+    // Redirect to dashboard
+    window.location.href="dashboard.html";
+    
+  } else {
+    alert("Please install MetaMask!");
+  }
 }
+
+// ---------- Project Marketplace ----------
+function loadMarketplace(){
+  marketplace.innerHTML="";
+  sampleProjects.forEach((p)=>{
+    const card=document.createElement('div');
+    card.className='project-card';
+    card.innerHTML=`
+      <h3>${p.name}</h3>
+      <p>Type: ${p.type}</p>
+      <p>CO₂ Offset: ${p.co2} tons</p>
+      <p>Location: ${p.location}</p>
+      <button onclick="buyToken(${p.id})">Buy Token</button>
+      <button onclick="retireToken(${p.id})">Retire Tokens</button>
+      <p id="balance-${p.id}">Balance: Connect Wallet</p>
+    `;
+    marketplace.appendChild(card);
+  });
+}
+loadMarketplace();
 
 async function buyToken(projectId){
   if(!signer){alert("Connect wallet first!"); return;}
@@ -152,7 +186,6 @@ async function buyToken(projectId){
     const tx=await contract.purchaseCarbonToken(projectId,{value:ethers.parseEther("0.01")});
     await tx.wait();
     alert("Token purchased successfully!");
-    updateBalances();
   }catch(e){console.error(e);alert("Transaction failed.");}
 }
 
@@ -164,39 +197,13 @@ async function retireToken(projectId){
     const tx=await contract.retireToken(projectId,balance);
     await tx.wait();
     alert("Tokens retired successfully!");
-    updateBalances();
   }catch(e){console.error(e);alert("Retirement failed.");}
 }
 
-function loadMarketplace(){
-  marketplace.innerHTML="";
-  sampleProjects.forEach((p)=>{
-    const card=document.createElement('div');
-    card.className='project-card';
-    card.innerHTML=`<h3>${p.name}</h3><p>Type: ${p.type}</p><p>CO₂ Offset: ${p.co2} tons</p><p>Location: ${p.location}</p>
-      <button onclick="buyToken(${p.id})">Buy Token</button>
-      <button onclick="retireToken(${p.id})">Retire Tokens</button>
-      <p id="balance-${p.id}">Balance: Connect Wallet</p>`;
-    marketplace.appendChild(card);
-  });
-}
-loadMarketplace();
-
-async function updateBalances(){
-  if(!signer) return;
-  const address=await signer.getAddress();
-  for(let p of sampleProjects){
-    try{
-      const bal=await contract.balanceOf(address,p.id);
-      document.getElementById(`balance-${p.id}`).innerText="Balance: "+bal;
-    }catch(e){document.getElementById(`balance-${p.id}`).innerText="Balance: 0";}
-  }
-}
-
-// Header scroll
+// ---------- Header Scroll ----------
 window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
 
-// WebGL Logo
+// ---------- WebGL Logo ----------
 const canvas=document.getElementById('logoCanvas');
 const scene=new THREE.Scene();
 const camera=new THREE.PerspectiveCamera(50,1,0.1,1000);
@@ -214,5 +221,6 @@ scene.add(new THREE.AmbientLight(0xffffff,0.5));
 function animate(){requestAnimationFrame(animate);knot.rotation.x+=0.01;knot.rotation.y+=0.01;renderer.render(scene,camera);}
 animate();
 </script>
+
 </body>
 </html>
