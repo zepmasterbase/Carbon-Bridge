@@ -6,62 +6,53 @@
 <title>CarbonBridge Dashboard</title>
 <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
 <style>
-body{margin:0;font-family:'Montserrat',sans-serif;background:#0B0C10;color:#E0E0E0;}
-header{position:fixed;width:100%;top:0;left:0;background:rgba(15,15,15,0.95);display:flex;justify-content:space-between;align-items:center;padding:1rem 3rem;box-shadow:0 2px 10px rgba(0,255,128,0.2);z-index:1000;}
-header .logo{color:#00FF96;font-weight:700;font-size:1.5rem;}
-header nav a{color:#00FF96;margin-left:2rem;font-weight:500;}
-header nav a:hover{color:#2CF5A0;}
-section{padding:6rem 3rem;max-width:1200px;margin:0 auto;}
-h2{color:#00FF96;font-size:2.2rem;margin-bottom:1.5rem;text-align:center;}
-.wallet-info{text-align:center;margin-bottom:2rem;}
-.wallet-info p{font-weight:600;color:#00FF96;}
-.dashboard{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:2rem;}
-.card{background:#1F1F2C;border-radius:12px;padding:2rem;box-shadow:0 6px 20px rgba(0,255,128,.1);transition:.3s;}
-.card:hover{transform:translateY(-8px);box-shadow:0 12px 25px rgba(0,255,128,.3);}
-.card h3{color:#00FF96;margin-bottom:1rem;}
-.card p{font-size:1rem;margin-bottom:.5rem;}
-button{padding:.6rem 1.2rem;background:#00FF96;color:#0B0C10;font-weight:700;border-radius:6px;cursor:pointer;transition:.3s;}
-button:hover{background:#2CF5A0;transform:translateY(-2px);}
-footer{background:#0B0C10;color:#00FF96;text-align:center;padding:2rem;margin-top:4rem;}
-footer a{color:#2CF5A0;margin:0 .5rem;}
+*{margin:0;padding:0;box-sizing:border-box;font-family:'Montserrat',sans-serif;}
+body{color:#E0E0E0;background:#0B0C10;scroll-behavior:smooth;overflow-x:hidden;}
+header{position:fixed;width:100%;top:0;left:0;z-index:1000;background:rgba(15,15,15,0.95);display:flex;justify-content:space-between;align-items:center;padding:1rem 3rem;box-shadow:0 2px 10px rgba(0,255,128,0.2);}
+header.scrolled{background:rgba(15,15,15,1);box-shadow:0 4px 20px rgba(0,255,128,0.3);}
+.logo{font-weight:700;font-size:1.5rem;color:#00FF96;letter-spacing:1px;cursor:pointer;}
+nav a{font-weight:500;color:#00FF96;font-size:1rem;margin-left:2rem;}
+nav a:hover{color:#2CF5A0;}
+#walletAddress{color:#00FF96;font-weight:600;}
+.dashboard{padding:6rem 3rem;max-width:1200px;margin:0 auto;}
+.card-container{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:2rem;margin-top:2rem;}
+.project-card{background:#1F1F2C;border-radius:12px;padding:1.5rem;display:flex;flex-direction:column;align-items:center;transition:.3s;box-shadow:0 6px 20px rgba(0,255,128,.1);}
+.project-card:hover{transform:translateY(-8px);box-shadow:0 12px 25px rgba(0,255,128,.3);}
+.project-card h3{color:#00FF96;margin-bottom:.5rem;text-align:center;}
+.project-card p{font-size:.95rem;margin-bottom:.5rem;text-align:center;}
+.project-card button{padding:.6rem;background:#00FF96;color:#0B0C10;font-weight:700;margin:0.3rem;width:120px;border-radius:6px;}
+.project-card button:hover{background:#2CF5A0;transform:translateY(-2px);}
+.co2-meter{width:100%;background:#0F1118;border-radius:12px;margin-top:1rem;overflow:hidden;}
+.co2-meter-fill{height:16px;background:#00FF96;width:0%;border-radius:12px;}
+#tokenCanvas{width:150px;height:150px;margin-bottom:1rem;}
+.project-icon{width:24px;height:24px;margin-left:0.5rem;cursor:pointer;filter:invert(0.8);}
+@media(max-width:768px){.card-container{grid-template-columns:1fr;}}
 </style>
 </head>
 <body>
 
-<header>
-  <div class="logo">CarbonBridge</div>
-  <nav><a href="index.html">Home</a></nav>
+<header id="header">
+  <div class="logo" onclick="window.location.href='index.html'">CarbonBridge</div>
+  <nav>
+    <a href="projects.html">Projects <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" class="project-icon" alt="projects icon"></a>
+    <span id="walletAddress">Not Connected</span>
+  </nav>
 </header>
 
-<section>
-  <h2>Your Carbon Dashboard</h2>
-  <div class="wallet-info">
-    <button onclick="connectWallet()">Connect Wallet</button>
-    <p id="walletAddress">Not connected</p>
+<div class="dashboard">
+  <h2 style="text-align:center;color:#00FF96;">Your CarbonBridge Dashboard</h2>
+  <p style="text-align:center;">Track your token balances, retire tokens, and see your real-time CO₂ impact!</p>
+  
+  <div class="card-container" id="cardContainer">
+    <!-- Project cards inserted here dynamically -->
   </div>
-
-  <div class="dashboard" id="dashboard">
-    <!-- Project cards with balances and retirement history will load here -->
-  </div>
-</section>
-
-<footer>
-  <p>&copy; 2026 CarbonBridge. All rights reserved.</p>
-  <p><a href="privacy.html">Privacy Policy</a> | <a href="terms.html">Terms</a></p>
-</footer>
+</div>
 
 <script src="https://cdn.jsdelivr.net/npm/ethers/dist/ethers.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.159.0/build/three.min.js"></script>
 <script>
-// Sample projects — same as marketplace
-const projects = [
-  {id:0,name:'Kenya Reforestation',co2:500,type:'Trees',location:'Kenya'},
-  {id:1,name:'India Solar Farm',co2:1200,type:'Solar',location:'India'},
-  {id:2,name:'US Wind Energy',co2:800,type:'Wind',location:'USA'},
-  {id:3,name:'Brazil Forest Conservation',co2:700,type:'Trees',location:'Brazil'}
-];
-
 let provider, signer, contract;
-const contractAddress="0xYourContractAddress"; // replace with your Ethereum contract
+const contractAddress="0xYourContractAddress"; // Replace with your Ethereum contract
 const abi=[
   "function purchaseCarbonToken(uint256 projectId) public payable",
   "function balanceOf(address owner,uint256 projectId) public view returns(uint256)",
@@ -69,56 +60,120 @@ const abi=[
   "function retirementHistory(address owner,uint256 projectId) public view returns(uint256)"
 ];
 
-async function connectWallet(){
+// Sample projects for demo
+const projects=[
+  {name:'Kenya Reforestation',type:'Trees',co2:500,location:'Kenya',id:0},
+  {name:'India Solar Farm',type:'Solar',co2:1200,location:'India',id:1},
+  {name:'US Wind Energy',type:'Wind',co2:800,location:'USA',id:2},
+  {name:'Brazil Forest Conservation',type:'Trees',co2:700,location:'Brazil',id:3}
+];
+
+const cardContainer=document.getElementById('cardContainer');
+
+// ---------- Initialize Web3 ----------
+async function init(){
+  const savedWallet=localStorage.getItem('connectedWallet');
   if(window.ethereum){
-    provider = new ethers.BrowserProvider(window.ethereum);
-    await provider.send("eth_requestAccounts", []);
-    signer = await provider.getSigner();
-    const address = await signer.getAddress();
-    document.getElementById('walletAddress').innerText = "Connected: "+address;
-    contract = new ethers.Contract(contractAddress, abi, signer);
+    provider=new ethers.BrowserProvider(window.ethereum);
+    signer=await provider.getSigner();
+    const address=savedWallet || await signer.getAddress();
+    document.getElementById('walletAddress').innerText="Connected: "+address;
+    contract=new ethers.Contract(contractAddress,abi,signer);
     loadDashboard();
-  } else {
-    alert("Please install MetaMask!");
+  }else{
+    alert("Please install MetaMask or Base wallet!");
   }
 }
 
+// ---------- Load Dashboard ----------
 async function loadDashboard(){
-  if(!signer) return;
-  const dashboardDiv = document.getElementById('dashboard');
-  dashboardDiv.innerHTML = "";
+  cardContainer.innerHTML="";
+  const userAddr=await signer.getAddress();
   for(let p of projects){
-    let balance = 0;
-    let retired = 0;
-    try{
-      balance = await contract.balanceOf(await signer.getAddress(), p.id);
-      retired = await contract.retirementHistory(await signer.getAddress(), p.id);
-    }catch(e){console.error(e);}
-    const card = document.createElement('div');
-    card.className = 'card';
-    card.innerHTML = `
+    const card=document.createElement('div');
+    card.className='project-card';
+    card.innerHTML=`
+      <canvas id="tokenCanvas-${p.id}"></canvas>
       <h3>${p.name}</h3>
       <p>Type: ${p.type}</p>
-      <p>CO₂ Offset per Token: ${p.co2} tons</p>
-      <p>Current Balance: ${balance}</p>
-      <p>Tokens Retired: ${retired}</p>
-      <button onclick="retireTokens(${p.id})">Retire All Tokens</button>
+      <p>CO₂ Offset: ${p.co2} tons</p>
+      <p>Location: ${p.location}</p>
+      <button onclick="buyToken(${p.id})">Buy Token</button>
+      <button onclick="retireToken(${p.id})">Retire Tokens</button>
+      <p id="balance-${p.id}">Balance: Loading...</p>
+      <div class="co2-meter"><div id="co2-fill-${p.id}" class="co2-meter-fill"></div></div>
     `;
-    dashboardDiv.appendChild(card);
+    cardContainer.appendChild(card);
+    init3DToken(`tokenCanvas-${p.id}`);
+    updateProjectBalance(p.id);
   }
 }
 
-async function retireTokens(projectId){
+// ---------- Buy Tokens ----------
+async function buyToken(projectId){
   if(!signer){alert("Connect wallet first!"); return;}
   try{
-    const balance = await contract.balanceOf(await signer.getAddress(), projectId);
-    if(balance == 0){alert("No tokens to retire"); return;}
-    const tx = await contract.retireToken(projectId, balance);
+    const tx=await contract.purchaseCarbonToken(projectId,{value:ethers.parseEther("0.01")});
+    await tx.wait();
+    alert("Token purchased successfully!");
+    updateProjectBalance(projectId);
+  }catch(e){console.error(e);alert("Purchase failed");}
+}
+
+// ---------- Retire Tokens ----------
+async function retireToken(projectId){
+  if(!signer){alert("Connect wallet first!"); return;}
+  try{
+    const balance=await contract.balanceOf(await signer.getAddress(),projectId);
+    if(balance==0){alert("No tokens to retire"); return;}
+    const tx=await contract.retireToken(projectId,balance);
     await tx.wait();
     alert("Tokens retired successfully!");
-    loadDashboard();
-  } catch(e){console.error(e); alert("Retirement failed.");}
+    updateProjectBalance(projectId);
+  }catch(e){console.error(e);alert("Retirement failed");}
 }
+
+// ---------- Update Balance & CO2 Meter ----------
+async function updateProjectBalance(projectId){
+  const balanceEl=document.getElementById(`balance-${projectId}`);
+  const co2Fill=document.getElementById(`co2-fill-${projectId}`);
+  try{
+    const userAddr=await signer.getAddress();
+    const balance=await contract.balanceOf(userAddr,projectId);
+    const retired=await contract.retirementHistory(userAddr,projectId);
+    balanceEl.innerText=`Balance: ${balance} | Retired: ${retired}`;
+    // Dynamic CO2 meter
+    const projectCO2=projects.find(p=>p.id===projectId).co2;
+    const percent=Math.min(100,(retired/projectCO2)*100);
+    co2Fill.style.width=`${percent}%`;
+  }catch(e){balanceEl.innerText="Balance: 0"; co2Fill.style.width="0%";}
+}
+
+// ---------- 3D Token Animation ----------
+function init3DToken(canvasId){
+  const canvas=document.getElementById(canvasId);
+  const scene=new THREE.Scene();
+  const camera=new THREE.PerspectiveCamera(50,1,0.1,1000);
+  camera.position.z=2.5;
+  const renderer=new THREE.WebGLRenderer({canvas,alpha:true,antialias:true});
+  renderer.setSize(150,150);
+  const geometry=new THREE.TetrahedronGeometry(0.5);
+  const material=new THREE.MeshStandardMaterial({color:0x00FF96,metalness:0.7,roughness:0.2});
+  const token=new THREE.Mesh(geometry,material);
+  scene.add(token);
+  const light=new THREE.DirectionalLight(0xffffff,1);
+  light.position.set(5,5,5);
+  scene.add(light);
+  scene.add(new THREE.AmbientLight(0xffffff,0.5));
+  function animate(){requestAnimationFrame(animate);token.rotation.x+=0.01;token.rotation.y+=0.01;renderer.render(scene,camera);}
+  animate();
+}
+
+// ---------- Header scroll ----------
+window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
+
+// ---------- Init dashboard ----------
+init();
 </script>
 
 </body>
