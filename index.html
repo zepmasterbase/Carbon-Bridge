@@ -1,252 +1,222 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>CarbonBridge – Blockchain for a Greener Tomorrow</title>
-  <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
-  <style>
-    /* ----- Global Styles ----- */
-    * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Montserrat', sans-serif; }
-    body { background-color: #F7F9FA; color: #1E293B; line-height: 1.6; }
-    a { text-decoration: none; color: inherit; }
-    button { cursor: pointer; border: none; border-radius: 6px; font-weight: 600; }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>CarbonBridge – Blockchain for a Greener Tomorrow</title>
+<link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@400;600;700&display=swap" rel="stylesheet">
+<style>
+  /* ----- Global ----- */
+  * { margin:0; padding:0; box-sizing:border-box; font-family: 'Montserrat', sans-serif; }
+  body { overflow-x: hidden; color: #1E293B; background: #F7F9FA; scroll-behavior: smooth; }
+  a { text-decoration: none; color: inherit; }
+  button { cursor: pointer; border: none; border-radius: 6px; font-weight: 600; }
 
-    /* ----- Header / Nav ----- */
-    header { position: sticky; top: 0; background: white; display: flex; justify-content: space-between; align-items: center; padding: 1rem 3rem; box-shadow: 0 2px 5px rgba(0,0,0,0.05); z-index: 1000; }
-    header .logo { display: flex; align-items: center; font-weight: 700; font-size: 1.4rem; color: #2C7A2C; }
-    nav a { margin-left: 2rem; font-weight: 500; color: #1D4ED8; }
-    nav a:hover { text-decoration: underline; }
+  /* ----- Header ----- */
+  header { position: fixed; width: 100%; top:0; left:0; z-index:1000; background: rgba(255,255,255,0.95); display:flex; justify-content:space-between; align-items:center; padding:1rem 3rem; box-shadow:0 2px 8px rgba(0,0,0,0.08); transition:0.3s; }
+  header.scrolled { background: #fff; box-shadow: 0 4px 15px rgba(0,0,0,0.15); }
+  .logo { font-weight:700; font-size:1.5rem; color:#2C7A2C; letter-spacing:1px; }
+  nav a { margin-left:2rem; font-weight:500; color:#1D4ED8; transition:0.3s; }
+  nav a:hover { color:#2C7A2C; }
 
-    /* ----- Hero Section ----- */
-    .hero { display: flex; flex-direction: column; justify-content: center; align-items: center; text-align: center; height: 90vh; background: linear-gradient(135deg, #1D4ED8, #2C7A2C); color: white; padding: 0 2rem; }
-    .hero h1 { font-size: 3rem; font-weight: 700; margin-bottom: 1rem; }
-    .hero p { font-size: 1.2rem; margin-bottom: 2rem; max-width: 600px; }
-    .hero .cta { display: flex; gap: 1rem; flex-wrap: wrap; justify-content: center; }
-    .hero .cta button { padding: 0.8rem 2rem; background: #A7D129; color: #1E293B; transition: 0.3s; }
-    .hero .cta button:hover { background: #91c31b; }
+  /* ----- Hero ----- */
+  .hero { height:100vh; display:flex; flex-direction:column; justify-content:center; align-items:center; text-align:center; background: linear-gradient(135deg, #1D4ED8, #2C7A2C); color:white; perspective:1000px; overflow:hidden; }
+  .hero h1 { font-size:3rem; font-weight:700; margin-bottom:1rem; text-shadow: 0 2px 8px rgba(0,0,0,0.3); }
+  .hero p { font-size:1.2rem; margin-bottom:2rem; max-width:600px; text-shadow: 0 1px 4px rgba(0,0,0,0.3); }
+  .hero .cta { display:flex; gap:1rem; flex-wrap:wrap; justify-content:center; }
+  .hero button { padding:0.8rem 2rem; background:#A7D129; color:#1E293B; transition:0.3s; }
+  .hero button:hover { background:#91c31b; transform:translateY(-3px); }
 
-    /* ----- Sections ----- */
-    section { padding: 6rem 3rem; max-width: 1200px; margin: 0 auto; }
-    section h2 { font-size: 2.2rem; font-weight: 700; color: #1D4ED8; margin-bottom: 1.5rem; text-align: center; }
-    section p { max-width: 800px; margin: 0 auto 2rem auto; text-align: center; }
+  /* 3D Logo Animation */
+  .logo-3d { width:200px; height:200px; margin-bottom:2rem; transform-style: preserve-3d; animation: rotateLogo 15s linear infinite; }
+  @keyframes rotateLogo { 0% { transform: rotateY(0deg) rotateX(0deg); } 100% { transform: rotateY(360deg) rotateX(360deg); } }
+  .logo-3d svg { width:100%; height:100%; }
 
-    /* ----- How It Works ----- */
-    .steps { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin-top: 2rem; }
-    .step { background: white; border-radius: 12px; padding: 2rem; width: 250px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); text-align: center; transition: 0.3s; }
-    .step:hover { transform: translateY(-5px); }
-    .step img { width: 80px; margin-bottom: 1rem; }
+  /* ----- Sections ----- */
+  section { padding:6rem 3rem; max-width:1200px; margin:0 auto; }
+  section h2 { font-size:2.2rem; font-weight:700; color:#1D4ED8; margin-bottom:1.5rem; text-align:center; }
+  section p { max-width:800px; margin:0 auto 2rem auto; text-align:center; }
 
-    /* ----- Marketplace Demo ----- */
-    .marketplace { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: 2rem; margin-top: 3rem; }
-    .project-card { background: white; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); padding: 1.5rem; display: flex; flex-direction: column; justify-content: space-between; transition: 0.3s; }
-    .project-card:hover { transform: translateY(-5px); }
-    .project-card h3 { color: #2C7A2C; margin-bottom: 0.5rem; }
-    .project-card p { font-size: 0.95rem; margin-bottom: 1rem; }
-    .project-card button { padding: 0.6rem; background: #1D4ED8; color: white; transition: 0.3s; }
-    .project-card button:hover { background: #1542a6; }
+  /* ----- Parallax Backgrounds ----- */
+  .parallax { background-attachment: fixed; background-size: cover; background-position: center; }
 
-    /* ----- Impact Counters ----- */
-    .impact { display: flex; justify-content: center; gap: 4rem; margin-top: 3rem; flex-wrap: wrap; }
-    .counter { background: #2C7A2C; color: white; padding: 2rem 3rem; border-radius: 12px; text-align: center; transition: 0.3s; }
-    .counter h3 { font-size: 2rem; margin-bottom: 0.5rem; }
-    .counter p { font-size: 1rem; }
+  /* ----- How It Works ----- */
+  .steps { display:flex; flex-wrap:wrap; gap:2rem; justify-content:center; margin-top:2rem; }
+  .step { background:white; border-radius:12px; padding:2rem; width:260px; box-shadow:0 6px 20px rgba(0,0,0,0.08); text-align:center; transition:0.3s; }
+  .step:hover { transform:translateY(-10px); box-shadow:0 12px 25px rgba(0,0,0,0.15); }
 
-    /* ----- Team ----- */
-    .team { display: flex; flex-wrap: wrap; gap: 2rem; justify-content: center; margin-top: 3rem; }
-    .member { text-align: center; width: 180px; }
-    .member img { width: 120px; height: 120px; border-radius: 50%; margin-bottom: 0.5rem; object-fit: cover; }
+  /* ----- Marketplace ----- */
+  .marketplace { display:grid; grid-template-columns:repeat(auto-fit, minmax(260px,1fr)); gap:2rem; margin-top:3rem; }
+  .project-card { background:white; border-radius:12px; box-shadow:0 6px 20px rgba(0,0,0,0.08); padding:1.5rem; display:flex; flex-direction:column; justify-content:space-between; transition:0.3s; }
+  .project-card:hover { transform:translateY(-8px); box-shadow:0 12px 25px rgba(0,0,0,0.15); }
+  .project-card h3 { color:#2C7A2C; margin-bottom:0.5rem; }
+  .project-card p { font-size:0.95rem; margin-bottom:1rem; }
+  .project-card button { padding:0.6rem; background:#1D4ED8; color:white; transition:0.3s; }
+  .project-card button:hover { background:#1542a6; transform:translateY(-2px); }
 
-    /* ----- CTA Section ----- */
-    .cta-section { background: #A7D129; text-align: center; padding: 4rem 2rem; border-radius: 12px; margin-top: 4rem; }
-    .cta-section h2 { color: #1E293B; margin-bottom: 1rem; }
-    .cta-section p { color: #1E293B; margin-bottom: 2rem; }
-    .cta-section input { padding: 0.8rem; width: 250px; border-radius: 6px; border: none; margin-right: 1rem; }
-    .cta-section button { padding: 0.8rem 1.5rem; background: #1D4ED8; color: white; }
+  /* ----- Impact Counters ----- */
+  .impact { display:flex; justify-content:center; gap:4rem; margin-top:3rem; flex-wrap:wrap; }
+  .counter { background:#2C7A2C; color:white; padding:2rem 3rem; border-radius:12px; text-align:center; transition:0.3s; }
+  .counter h3 { font-size:2rem; margin-bottom:0.5rem; }
+  .counter p { font-size:1rem; }
 
-    /* ----- Footer ----- */
-    footer { background: #1E293B; color: white; text-align: center; padding: 2rem; margin-top: 4rem; }
-    footer a { color: #A7D129; margin: 0 0.5rem; font-weight: 500; }
+  /* ----- Team ----- */
+  .team { display:flex; flex-wrap:wrap; gap:2rem; justify-content:center; margin-top:3rem; }
+  .member { text-align:center; width:180px; }
+  .member img { width:120px; height:120px; border-radius:50%; margin-bottom:0.5rem; object-fit:cover; transition:0.3s; }
+  .member img:hover { transform:scale(1.1); }
 
-    /* ----- Responsive ----- */
-    @media (max-width: 768px) {
-      .steps { flex-direction: column; }
-      .marketplace { grid-template-columns: 1fr; }
-    }
-  </style>
+  /* ----- CTA Section ----- */
+  .cta-section { background:#A7D129; text-align:center; padding:4rem 2rem; border-radius:12px; margin-top:4rem; }
+  .cta-section h2 { color:#1E293B; margin-bottom:1rem; }
+  .cta-section p { color:#1E293B; margin-bottom:2rem; }
+  .cta-section input { padding:0.8rem; width:250px; border-radius:6px; border:none; margin-right:1rem; }
+  .cta-section button { padding:0.8rem 1.5rem; background:#1D4ED8; color:white; }
+
+  /* ----- Footer ----- */
+  footer { background:#1E293B; color:white; text-align:center; padding:2rem; margin-top:4rem; }
+  footer a { color:#A7D129; margin:0 0.5rem; font-weight:500; }
+
+  /* ----- Responsive ----- */
+  @media(max-width:768px){ .steps{flex-direction:column;} .marketplace{grid-template-columns:1fr;} }
+</style>
 </head>
 <body>
 
-  <!-- Header -->
-  <header>
-    <div class="logo">CarbonBridge</div>
-    <nav>
-      <a href="#about">About</a>
-      <a href="#how">How It Works</a>
-      <a href="#projects">Projects</a>
-      <a href="#team">Team</a>
-      <a href="#contact">Contact</a>
-    </nav>
-  </header>
+<!-- Header -->
+<header id="header">
+  <div class="logo">CarbonBridge</div>
+  <nav>
+    <a href="#about">About</a>
+    <a href="#how">How It Works</a>
+    <a href="#projects">Projects</a>
+    <a href="#team">Team</a>
+    <a href="#contact">Contact</a>
+  </nav>
+</header>
 
-  <!-- Hero Section -->
-  <section class="hero">
-    <h1>CarbonBridge – Blockchain for a Greener Tomorrow</h1>
-    <p>Connecting verified carbon reduction projects with the world. Transparent, trusted, and impactful.</p>
-    <div class="cta">
-      <button onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})">Explore Projects</button>
-      <button onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Join Early Access</button>
+<!-- Hero -->
+<section class="hero">
+  <div class="logo-3d">
+    <!-- Inline SVG 3D style logo -->
+    <svg viewBox="0 0 100 100">
+      <polygon points="10,80 50,10 90,80" fill="#A7D129" />
+      <polygon points="25,60 50,20 75,60" fill="#2C7A2C" />
+      <circle cx="50" cy="40" r="5" fill="#fff"/>
+    </svg>
+  </div>
+  <h1>CarbonBridge – Blockchain for a Greener Tomorrow</h1>
+  <p>Connecting verified carbon reduction projects with the world. Transparent, trusted, and impactful.</p>
+  <div class="cta">
+    <button onclick="document.getElementById('projects').scrollIntoView({behavior:'smooth'})">Explore Projects</button>
+    <button onclick="document.getElementById('contact').scrollIntoView({behavior:'smooth'})">Join Early Access</button>
+  </div>
+</section>
+
+<!-- About Section -->
+<section id="about">
+  <h2>Our Vision</h2>
+  <p>Empowering individuals and organizations to take real climate action by connecting verified carbon reduction projects with blockchain-powered transparency and accountability.</p>
+</section>
+
+<!-- How It Works -->
+<section id="how" class="parallax" style="background:url('https://images.unsplash.com/photo-1503264116251-35a269479413?auto=format&fit=crop&w=1600&q=80') no-repeat center center;">
+  <h2>How It Works</h2>
+  <div class="steps">
+    <div class="step">
+      <h3>Create a Project</h3>
+      <p>Submit, verify, and list your carbon reduction initiative for global impact.</p>
     </div>
-  </section>
-
-  <!-- About Section -->
-  <section id="about">
-    <h2>Our Vision</h2>
-    <p>CarbonBridge empowers individuals and organizations to take real climate action by connecting verified carbon reduction projects with blockchain-powered transparency and accountability.</p>
-  </section>
-
-  <!-- How It Works -->
-  <section id="how">
-    <h2>How It Works</h2>
-    <div class="steps">
-      <div class="step">
-        <img src="https://img.icons8.com/fluency/96/plant.png" alt="Project Creation">
-        <h3>Create a Project</h3>
-        <p>Submit, verify, and list your carbon reduction initiative for global impact.</p>
-      </div>
-      <div class="step">
-        <img src="https://img.icons8.com/fluency/96/blockchain.png" alt="Tokenization">
-        <h3>Tokenize Carbon Credits</h3>
-        <p>Verified carbon reductions are converted into blockchain tokens for traceability and trust.</p>
-      </div>
-      <div class="step">
-        <img src="https://img.icons8.com/fluency/96/purchase-order.png" alt="Buy & Retire">
-        <h3>Buy & Retire Credits</h3>
-        <p>Offset your carbon footprint by buying and retiring tokens directly on the platform.</p>
-      </div>
+    <div class="step">
+      <h3>Tokenize Carbon Credits</h3>
+      <p>Verified carbon reductions are converted into blockchain tokens for traceability and trust.</p>
     </div>
-  </section>
-
-  <!-- Marketplace Demo -->
-  <section id="projects">
-    <h2>Project Marketplace</h2>
-    <div class="marketplace" id="marketplace">
-      <!-- Project cards will be dynamically injected -->
+    <div class="step">
+      <h3>Buy & Retire Credits</h3>
+      <p>Offset your carbon footprint by buying and retiring tokens directly on the platform.</p>
     </div>
-  </section>
+  </div>
+</section>
 
-  <!-- Impact Section -->
-  <section id="impact">
-    <h2>Global Impact</h2>
-    <div class="impact">
-      <div class="counter">
-        <h3 id="projectsCounter">0</h3>
-        <p>Projects Funded</p>
-      </div>
-      <div class="counter">
-        <h3 id="co2Counter">0</h3>
-        <p>CO₂ Offset (Tons)</p>
-      </div>
-      <div class="counter">
-        <h3 id="countriesCounter">0</h3>
-        <p>Countries Reached</p>
-      </div>
-    </div>
-  </section>
+<!-- Marketplace -->
+<section id="projects">
+  <h2>Project Marketplace</h2>
+  <div class="marketplace" id="marketplace"></div>
+</section>
 
-  <!-- Team Section -->
-  <section id="team">
-    <h2>Meet the Team</h2>
-    <div class="team">
-      <div class="member">
-        <img src="https://via.placeholder.com/120" alt="Team Member">
-        <h4>Alex Green</h4>
-        <p>Founder & CEO</p>
-      </div>
-      <div class="member">
-        <img src="https://via.placeholder.com/120" alt="Team Member">
-        <h4>Sara Blue</h4>
-        <p>CTO</p>
-      </div>
-      <div class="member">
-        <img src="https://via.placeholder.com/120" alt="Team Member">
-        <h4>Ravi Patel</h4>
-        <p>COO</p>
-      </div>
-    </div>
-  </section>
+<!-- Impact -->
+<section id="impact">
+  <h2>Global Impact</h2>
+  <div class="impact">
+    <div class="counter"><h3 id="projectsCounter">0</h3><p>Projects Funded</p></div>
+    <div class="counter"><h3 id="co2Counter">0</h3><p>CO₂ Offset (Tons)</p></div>
+    <div class="counter"><h3 id="countriesCounter">0</h3><p>Countries Reached</p></div>
+  </div>
+</section>
 
-  <!-- CTA Section -->
-  <section class="cta-section" id="contact">
-    <h2>Be Part of the Carbon Revolution</h2>
-    <p>Join early access and start offsetting carbon with verified projects.</p>
-    <input type="email" placeholder="Enter your email">
-    <button>Sign Up</button>
-  </section>
+<!-- Team -->
+<section id="team">
+  <h2>Meet the Team</h2>
+  <div class="team">
+    <div class="member"><img src="https://via.placeholder.com/120" alt="Team Member"><h4>Alex Green</h4><p>Founder & CEO</p></div>
+    <div class="member"><img src="https://via.placeholder.com/120" alt="Team Member"><h4>Sara Blue</h4><p>CTO</p></div>
+    <div class="member"><img src="https://via.placeholder.com/120" alt="Team Member"><h4>Ravi Patel</h4><p>COO</p></div>
+  </div>
+</section>
 
-  <!-- Footer -->
-  <footer>
-    <p>&copy; 2026 CarbonBridge. All rights reserved.</p>
-    <p>
-      <a href="#">Privacy Policy</a> |
-      <a href="#">Terms</a> |
-      <a href="#">LinkedIn</a>
-    </p>
-  </footer>
+<!-- CTA -->
+<section class="cta-section" id="contact">
+  <h2>Be Part of the Carbon Revolution</h2>
+  <p>Join early access and start offsetting carbon with verified projects.</p>
+  <input type="email" placeholder="Enter your email"><button>Sign Up</button>
+</section>
 
-  <!-- JS: Marketplace Simulation & Counters -->
-  <script>
-    // ----- Sample Projects -----
-    const sampleProjects = [
-      { name: 'Kenya Reforestation', type: 'Trees', co2: 500, location: 'Kenya' },
-      { name: 'India Solar Farm', type: 'Solar', co2: 1200, location: 'India' },
-      { name: 'US Wind Energy', type: 'Wind', co2: 800, location: 'USA' },
-      { name: 'Brazil Forest Conservation', type: 'Trees', co2: 700, location: 'Brazil' },
-    ];
+<!-- Footer -->
+<footer>
+  <p>&copy; 2026 CarbonBridge. All rights reserved.</p>
+  <p><a href="#">Privacy Policy</a> | <a href="#">Terms</a> | <a href="#">LinkedIn</a></p>
+</footer>
 
-    const marketplace = document.getElementById('marketplace');
+<!-- JS: Marketplace Simulation & Counters -->
+<script>
+  const sampleProjects = [
+    { name: 'Kenya Reforestation', type: 'Trees', co2: 500, location: 'Kenya' },
+    { name: 'India Solar Farm', type: 'Solar', co2: 1200, location: 'India' },
+    { name: 'US Wind Energy', type: 'Wind', co2: 800, location: 'USA' },
+    { name: 'Brazil Forest Conservation', type: 'Trees', co2: 700, location: 'Brazil' },
+  ];
+  const marketplace = document.getElementById('marketplace');
+  function loadProjects() {
+    sampleProjects.forEach((project,index)=>{
+      const card=document.createElement('div');
+      card.className='project-card';
+      card.innerHTML=`<h3>${project.name}</h3><p>Type: ${project.type}</p><p>CO₂ Offset: ${project.co2} tons</p><p>Location: ${project.location}</p><button onclick="buyProject(${index})">Buy Token</button>`;
+      marketplace.appendChild(card);
+    });
+  }
+  function buyProject(index){
+    let purchased=JSON.parse(localStorage.getItem('purchasedProjects'))||[];
+    if(!purchased.includes(index)){
+      purchased.push(index);
+      localStorage.setItem('purchasedProjects',JSON.stringify(purchased));
+      alert(`Token for ${sampleProjects[index].name} purchased!`);
+      updateCounters();
+    }else{alert('You already purchased this token.');}
+  }
+  function updateCounters(){
+    const purchased=JSON.parse(localStorage.getItem('purchasedProjects'))||[];
+    const projectsCounter=purchased.length;
+    const co2Counter=purchased.reduce((sum,idx)=>sum+sampleProjects[idx].co2,0);
+    const countriesCounter=new Set(purchased.map(idx=>sampleProjects[idx].location)).size;
+    document.getElementById('projectsCounter').innerText=projectsCounter;
+    document.getElementById('co2Counter').innerText=co2Counter;
+    document.getElementById('countriesCounter').innerText=countriesCounter;
+  }
+  loadProjects();
+  updateCounters();
 
-    function loadProjects() {
-      sampleProjects.forEach((project, index) => {
-        const card = document.createElement('div');
-        card.className = 'project-card';
-        card.innerHTML = `
-          <h3>${project.name}</h3>
-          <p>Type: ${project.type}</p>
-          <p>CO₂ Offset: ${project.co2} tons</p>
-          <p>Location: ${project.location}</p>
-          <button onclick="buyProject(${index})">Buy Token</button>
-        `;
-        marketplace.appendChild(card);
-      });
-    }
-
-    function buyProject(index) {
-      let purchased = JSON.parse(localStorage.getItem('purchasedProjects')) || [];
-      if (!purchased.includes(index)) {
-        purchased.push(index);
-        localStorage.setItem('purchasedProjects', JSON.stringify(purchased));
-        alert(`Token for ${sampleProjects[index].name} purchased!`);
-        updateCounters();
-      } else {
-        alert('You already purchased this token.');
-      }
-    }
-
-    // ----- Impact Counters -----
-    function updateCounters() {
-      const purchased = JSON.parse(localStorage.getItem('purchasedProjects')) || [];
-      const projectsCounter = purchased.length;
-      const co2Counter = purchased.reduce((sum, idx) => sum + sampleProjects[idx].co2, 0);
-      const countriesCounter = new Set(purchased.map(idx => sampleProjects[idx].location)).size;
-
-      document.getElementById('projectsCounter').innerText = projectsCounter;
-      document.getElementById('co2Counter').innerText = co2Counter;
-      document.getElementById('countriesCounter').innerText = countriesCounter;
-    }
-
-    loadProjects();
-    updateCounters();
-  </script>
+  // Header scroll effect
+  window.addEventListener('scroll',()=>{document.getElementById('header').classList.toggle('scrolled',window.scrollY>50)});
+</script>
 </body>
 </html>
